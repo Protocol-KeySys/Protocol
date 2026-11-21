@@ -32,8 +32,55 @@ function setWindowSize([w, h]) {
 function show(id) {
   for (const s of ["lockScreen", "menuScreen", "tosScreen"])
     $(s).classList.toggle("hidden", s !== id);
-  setWindowSize(id === "lockScreen" ? LOCK_SIZE : MENU_SIZE);
+  // Only the lock window changes size (ToS is bigger); the menu
+  // window is user-resizable, so don't snap it back.
+  if (id !== "menuScreen")
+    setWindowSize(id === "lockScreen" ? LOCK_SIZE : MENU_SIZE);
 }
+
+// When running inside Tauri, a successful login opens a separate
+// resizable menu window and closes the lock window. In a plain
+// browser (dev) it just swaps screens in place.
+async function openMenuWindow(key) {
+  const { WebviewWindow } = window.__TAURI__.webviewWindow;
+  const menu = new WebviewWindow(`menu-${Date.now()}`, {
+    url: `index.html#menu:${encodeURIComponent(key)}`,
+    title: "Protocol Key System",
+    width: MENU_SIZE[0],
+    height: MENU_SIZE[1],
+    resizable: true,
+    center: true,
+    decorations: false,
+  });
+  const self = window.__TAURI__.window.getCurrentWindow();
+  menu.once("tauri://created", () => self.close());
+  menu.once("tauri://error", () => toast("Failed to open menu."));
+}
+
+// Menu windows boot via index.html#menu:<key> — re-validate the key
+// server-side rather than trusting state passed between windows.
+async function bootMenu(key) {
+  try {
+    const res = await fetch(`${API}/api/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.valid) {
+      show("lockScreen");
+      $("lockError").textContent = data.error || "Invalid key.";
+      return;
+    }
+    enterMenu(key, data);
+  } catch {
+    show("lockScreen");
+    $("lockError").textContent = "Can't reach server.";
+  }
+}
+
+const bootHash = location.hash.match(/^#menu:(.+)$/);
+if (bootHash) bootMenu(decodeURIComponent(bootHash[1]));
 
 function showTos() {
   prevScreen = $("menuScreen").classList.contains("hidden")
@@ -74,7 +121,8 @@ $("confirmBtn").addEventListener("click", async () => {
       $("lockError").textContent = data.error || "Invalid key.";
       return;
     }
-    enterMenu(key, data);
+    if (window.__TAURI__) openMenuWindow(key);
+    else enterMenu(key, data);
   } catch {
     $("lockError").textContent = "Can't reach server.";
   }
@@ -157,6 +205,14 @@ $("backBtn").addEventListener("click", renderEntitledView);
 
 $("plusTile").addEventListener("click", () =>
   toast("Platform search coming soon."));
+
+// Frameless resize grips: drag window edges/corners.
+for (const el of document.querySelectorAll(".rz"))
+  el.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    window.__TAURI__?.window.getCurrentWindow()
+      .startResizeDragging(el.dataset.rz);
+  });
 
 function makeTile(name) {
   const tile = document.createElement("button");
