@@ -59,9 +59,14 @@ body {
   font-size: 22px;
 }
 
+/* uniform button height so logo buttons match text buttons */
+.input-pill, #confirmBtn, .lock-row .btn, .footer-col .pill {
+  height: 84px;
+}
+
 /* logos: W_ (black wordmark) on light, B_ (white) on dark */
 .powered-logo { height: 110px; }
-.logo-img { height: 44px; display: block; }
+.logo-img { height: 36px; display: block; }
 .powered-dark { height: 90px; }
 
 /* ---------- lock screen ---------- */
@@ -166,9 +171,6 @@ body {
   color: #222;
 }
 .tile:hover { filter: brightness(1.06); }
-
-.tile-locked { opacity: 0.45; cursor: not-allowed; }
-.tile-locked:hover { filter: none; }
 
 .tile-more {
   background: var(--tile-dark);

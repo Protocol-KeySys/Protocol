@@ -20,6 +20,7 @@ KEY_FILE = BASE / "keys.json"
 
 ALPHABET = "K7QWZX9MNP3RCTVH"
 RENEW_SECONDS = 24 * 3600
+ADMIN_CAP_SECONDS = 30 * 24 * 3600  # admin renewals capped at +30d from now
 MAX_FAILS = 10
 FAIL_WINDOW = 3600
 
@@ -140,9 +141,18 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(401, {"ok": False, "error": "invalid key"})
             if rec["expires_at"] <= time.time():
                 return self._json(401, {"ok": False, "error": "key expired"})
-            rec["expires_at"] += RENEW_SECONDS
+            if not rec.get("admin"):
+                # Normal keys renew through the ad-link checkpoint
+                # (Linkvertise/LootLabs flow — to be built).
+                return self._json(200, {"ok": False, "checkpoint_required": True})
+            cap = int(time.time()) + ADMIN_CAP_SECONDS
+            rec["expires_at"] = min(rec["expires_at"] + RENEW_SECONDS, cap)
             save_keys(KEYS)
-            return self._json(200, {"ok": True, "seconds_left": rec["expires_at"] - int(time.time())})
+            return self._json(200, {
+                "ok": True,
+                "seconds_left": rec["expires_at"] - int(time.time()),
+                "capped": rec["expires_at"] >= cap,
+            })
 
         if self.path == "/api/select":
             body = self._body()
@@ -163,6 +173,7 @@ class Handler(BaseHTTPRequestHandler):
                 "username": body.get("username", "user"),
                 "platforms": body.get("platforms", []),
                 "expires_at": int(time.time()) + min(body.get("hours", 24), 24 * 365) * 3600,
+                "admin": bool(body.get("admin", False)),
             }
             save_keys(KEYS)
             return self._json(200, {"key": key})

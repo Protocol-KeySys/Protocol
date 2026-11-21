@@ -76,27 +76,40 @@ function enterMenu(key, data) {
   startCountdown(data.seconds_left || 0);
 }
 
-// Entitled view: your platforms + the ••• "all apps" tile. No back button here.
+// Entitled view: your platforms + helper tile. No back button here.
+// 0 platforms  -> "+" tile (future platform search)
+// 1-3 platforms -> "•••" tile (all apps)
+// 4+ platforms -> tiles only
 function renderEntitledView() {
   $("backBtn").classList.add("hidden");
-  $("menuSubtitle").textContent = "Please select a platform:";
 
   const grid = $("platformGrid");
   grid.innerHTML = "";
 
-  for (const name of session.platforms || []) {
-    grid.appendChild(makeTile(name, true));
+  const platforms = session.platforms || [];
+  for (const name of platforms) {
+    grid.appendChild(makeTile(name));
   }
 
-  const more = document.createElement("button");
-  more.className = "tile tile-more";
-  more.textContent = "•••";
-  more.title = "All apps";
-  more.addEventListener("click", renderAllAppsView);
-  grid.appendChild(more);
+  if (platforms.length === 0) {
+    const plus = document.createElement("button");
+    plus.className = "tile tile-more";
+    plus.textContent = "+";
+    plus.title = "Add a platform";
+    plus.addEventListener("click", () =>
+      toast("Platform search coming soon."));
+    grid.appendChild(plus);
+  } else if (platforms.length < 4) {
+    const more = document.createElement("button");
+    more.className = "tile tile-more";
+    more.textContent = "•••";
+    more.title = "All apps";
+    more.addEventListener("click", renderAllAppsView);
+    grid.appendChild(more);
+  }
 }
 
-// All-apps view: full catalog; locked tiles are dimmed. Back button returns.
+// All-apps view: full catalog, every platform enabled. Back button returns.
 async function renderAllAppsView() {
   if (!allPlatforms) {
     try {
@@ -108,26 +121,22 @@ async function renderAllAppsView() {
     }
   }
 
-  $("menuSubtitle").textContent = "All apps — ones on your key are lit:";
-
-  const entitled = new Set((session.platforms || []).map((p) => p.toLowerCase()));
   const grid = $("platformGrid");
   grid.innerHTML = "";
 
   for (const name of allPlatforms)
-    grid.appendChild(makeTile(name, entitled.has(name.toLowerCase())));
+    grid.appendChild(makeTile(name));
 
   $("backBtn").classList.remove("hidden");
 }
 
 $("backBtn").addEventListener("click", renderEntitledView);
 
-function makeTile(name, entitled) {
+function makeTile(name) {
   const tile = document.createElement("button");
-  tile.className = "tile" + (entitled ? "" : " tile-locked");
+  tile.className = "tile";
   tile.textContent = name;
-  if (entitled) tile.addEventListener("click", () => selectPlatform(name));
-  else tile.addEventListener("click", () => toast(`${name} isn't on your key.`));
+  tile.addEventListener("click", () => selectPlatform(name));
   return tile;
 }
 
@@ -175,9 +184,13 @@ $("renewBtn").addEventListener("click", async () => {
     body: JSON.stringify({ key: session.key }),
   });
   const data = await res.json();
-  if (res.ok && data.seconds_left != null) {
+  if (data.checkpoint_required) {
+    // Normal keys go through a Linkvertise/LootLabs-style checkpoint.
+    // Stub until the checkpoint flow is built.
+    toast("Checkpoint required — ad-link flow coming soon.");
+  } else if (res.ok && data.seconds_left != null) {
     startCountdown(data.seconds_left);
-    toast("Time added.");
+    toast(data.capped ? "Time added (cap reached)." : "Time added.");
   } else {
     toast(data.error || "Renew failed.");
   }

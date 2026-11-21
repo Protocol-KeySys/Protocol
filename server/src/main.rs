@@ -30,6 +30,7 @@ use tower_http::{cors::CorsLayer, services::ServeDir};
 const ALPHABET: &[u8; 16] = b"K7QWZX9MNP3RCTVH";
 const KEY_FILE: &str = "keys.json";
 const RENEW_SECONDS: u64 = 24 * 3600;
+const ADMIN_CAP_SECONDS: u64 = 30 * 24 * 3600; // admin renewals capped at +30d
 const MAX_FAILS: u32 = 10; // per IP per hour window
 
 // Full catalog shown in the "all apps" view; a key's record lists its subset.
@@ -68,6 +69,8 @@ struct KeyRecord {
     username: String,
     platforms: Vec<String>,
     expires_at: u64,
+    #[serde(default)]
+    admin: bool,
 }
 
 #[derive(Default)]
@@ -126,6 +129,8 @@ struct IssueBody {
     username: String,
     platforms: Vec<String>,
     hours: u64,
+    #[serde(default)]
+    admin: bool,
 }
 
 #[derive(Serialize)]
@@ -182,10 +187,17 @@ async fn renew(
     if rec.expires_at <= now() {
         return Err((StatusCode::UNAUTHORIZED, err("key expired")));
     }
-    rec.expires_at += RENEW_SECONDS;
+    if !rec.admin {
+        // Normal keys renew through the ad-link checkpoint
+        // (Linkvertise/LootLabs flow — to be built).
+        return Ok(Json(serde_json::json!({ "ok": false, "checkpoint_required": true })));
+    }
+    let cap = now() + ADMIN_CAP_SECONDS;
+    rec.expires_at = (rec.expires_at + RENEW_SECONDS).min(cap);
     let left = rec.expires_at - now();
+    let capped = rec.expires_at >= cap;
     s.save();
-    Ok(Json(serde_json::json!({ "ok": true, "seconds_left": left })))
+    Ok(Json(serde_json::json!({ "ok": true, "seconds_left": left, "capped": capped })))
 }
 
 async fn select(
@@ -222,6 +234,7 @@ async fn issue(
         username: body.username,
         platforms: body.platforms,
         expires_at: now() + body.hours.min(24 * 365) * 3600,
+        admin: body.admin,
     };
     st.lock().unwrap().keys.insert(key_hash(&key), rec);
     st.lock().unwrap().save();
