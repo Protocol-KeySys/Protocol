@@ -19,9 +19,20 @@ let prevScreen = null;   // for ToS back navigation
 
 // ---------- screen switching ----------
 
+// Window is exactly the lock rectangle at startup (fixed size);
+// the client resizes it when the menu/ToS need more room.
+const LOCK_SIZE = [720, 460];
+const MENU_SIZE = [1600, 1120];
+
+function setWindowSize([w, h]) {
+  const wapi = window.__TAURI__?.window;
+  try { wapi?.getCurrentWindow().setSize(new wapi.LogicalSize(w, h)); } catch {}
+}
+
 function show(id) {
   for (const s of ["lockScreen", "menuScreen", "tosScreen"])
     $(s).classList.toggle("hidden", s !== id);
+  setWindowSize(id === "lockScreen" ? LOCK_SIZE : MENU_SIZE);
 }
 
 function showTos() {
