@@ -10,7 +10,7 @@
 
 <!-- ============ LOCK SCREEN ============ -->
 <section id="lockScreen" class="screen">
-  <div class="lock-card">
+  <div class="lock-card" data-tauri-drag-region>
     <input id="keyInput" class="pill input-pill" type="text"
            placeholder="Enter Key Here" autocomplete="off" spellcheck="false">
     <button id="confirmBtn" class="pill btn btn-green">Confirm</button>
@@ -20,13 +20,14 @@
         <img class="logo-img" src="assets/W_Protocol_t.png" alt="protocol">
       </button>
     </div>
+    <button id="exitBtn" class="pill btn btn-red">Exit</button>
     <p id="lockError" class="lock-error"></p>
   </div>
 </section>
 
 <!-- ============ PLATFORM MENU ============ -->
 <section id="menuScreen" class="screen hidden">
-  <div class="menu-card">
+  <div class="menu-card" data-tauri-drag-region>
     <h1 class="menu-title">Welcome, <span id="menuUsername">{username}</span>!</h1>
     <p id="menuSubtitle" class="menu-subtitle">Please select a platform:</p>
 

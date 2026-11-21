@@ -21,7 +21,7 @@ let prevScreen = null;   // for ToS back navigation
 
 // Window is exactly the lock rectangle at startup (fixed size);
 // the client resizes it when the menu/ToS need more room.
-const LOCK_SIZE = [720, 460];
+const LOCK_SIZE = [720, 540];
 const MENU_SIZE = [1600, 1120];
 
 function setWindowSize([w, h]) {
@@ -49,6 +49,12 @@ $("tosBackBtn").addEventListener("click", () => show(prevScreen || "lockScreen")
 
 $("keyInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") $("confirmBtn").click();
+});
+
+$("exitBtn").addEventListener("click", () => {
+  const wapi = window.__TAURI__?.window;
+  if (wapi) wapi.getCurrentWindow().close();
+  else window.close();
 });
 
 $("confirmBtn").addEventListener("click", async () => {

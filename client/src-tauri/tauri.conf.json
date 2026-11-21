@@ -13,10 +13,11 @@
         "label": "main",
         "title": "Protocol Key System",
         "width": 720,
-        "height": 460,
+        "height": 540,
         "resizable": false,
         "maximizable": false,
-        "center": true
+        "center": true,
+        "decorations": false
       }
     ],
     "security": {

@@ -52,6 +52,9 @@ body {
 .btn-blue   { background: var(--blue); }
 .btn-orange { background: var(--orange); }
 .btn-purple { background: var(--purple); }
+.btn-red    { background: #e04b4b; }
+
+#exitBtn { width: 100%; }
 
 .info-pill {
   background: var(--tile);
