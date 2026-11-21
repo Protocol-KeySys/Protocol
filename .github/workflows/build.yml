@@ -1,0 +1,43 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            server/target
+            client/src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build keyserver
+        run: cargo build --release --manifest-path server/Cargo.toml
+
+      - name: Install tauri-cli
+        run: cargo install tauri-cli --version "^2.0" --locked
+
+      - name: Build client (.exe + .msi)
+        working-directory: client/src-tauri
+        run: cargo tauri build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-windows
+          path: |
+            server/target/release/protocol-keyserver.exe
+            client/src-tauri/target/release/bundle/**

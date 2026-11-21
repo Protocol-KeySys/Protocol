@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key System — powered by protocol</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ LOCK SCREEN ============ -->
+<section id="lockScreen" class="screen">
+  <header class="lock-header">
+    <h1 class="lock-title">Untitled Key System</h1>
+    <span class="lock-divider">|</span>
+    <img class="powered-logo" src="assets/W_P_Protocol_t.png" alt="powered by protocol">
+  </header>
+
+  <div class="lock-panel">
+    <div class="lock-form">
+      <input id="keyInput" class="pill input-pill" type="text"
+             placeholder="Enter Key Here" autocomplete="off" spellcheck="false">
+      <button id="confirmBtn" class="pill btn btn-green">Confirm</button>
+      <div class="lock-row">
+        <button class="pill btn btn-blue">Key System Site</button>
+        <button class="pill btn btn-orange tos-btn">
+          <img class="logo-img" src="assets/W_Protocol_t.png" alt="protocol">
+        </button>
+      </div>
+      <p id="lockError" class="lock-error"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLATFORM MENU ============ -->
+<section id="menuScreen" class="screen hidden">
+  <div class="menu-card">
+    <h1 class="menu-title">Welcome, <span id="menuUsername">{username}</span>!</h1>
+    <p id="menuSubtitle" class="menu-subtitle">Please select a platform:</p>
+
+    <div class="platform-panel">
+      <button id="backBtn" class="back-btn hidden" title="back">&#8249;</button>
+      <div id="platformGrid" class="platform-grid"></div>
+    </div>
+  </div>
+
+  <footer class="menu-footer">
+    <div class="footer-col">
+      <button class="pill btn btn-green">Get New Key</button>
+      <button class="pill btn btn-blue">Key System Site</button>
+      <button class="pill btn btn-orange tos-btn">
+        <img class="logo-img" src="assets/W_Protocol_t.png" alt="protocol">
+      </button>
+    </div>
+    <div class="footer-col">
+      <div class="pill info-pill">Current Key: <span id="currentKey">—</span></div>
+      <div class="pill info-pill">Time Left: <span id="timeLeft">000:00:00</span></div>
+      <button id="renewBtn" class="pill btn btn-purple">Add Time / Renew</button>
+    </div>
+  </footer>
+
+  <p id="toast" class="toast hidden"></p>
+</section>
+
+<!-- ============ TOS / ABOUT PROTOCOL ============ -->
+<section id="tosScreen" class="screen hidden">
+  <div class="tos-card">
+    <header class="tos-header">
+      <img class="powered-logo powered-dark" src="assets/B_P_Protocol_t.png" alt="powered by protocol">
+      <button id="tosBackBtn" class="back-btn" title="back">&#8249;</button>
+    </header>
+    <div class="tos-body">
+      <h2>Protocol — Secure Key Courier</h2>
+      <p>
+        Protocol is the backend that powers this key system. It issues, stores,
+        and validates time-limited keys server-side, so client applications never
+        hold key material or decide their own validity. It will be published
+        open-source on GitHub for others to build key systems on.
+      </p>
+      <h3>Terms of Service <span class="tos-draft">(draft)</span></h3>
+      <ol>
+        <li>Keys are personal, non-transferable, and time-limited.</li>
+        <li>Sharing, reselling, or attempting to forge keys terminates access.</li>
+        <li>Keys may be bound to an account or device at the issuer's discretion.</li>
+        <li>The service is provided "as is"; availability is best-effort.</li>
+        <li>These terms are a placeholder pending the public GitHub release.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

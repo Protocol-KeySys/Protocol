@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Protocol Key System",
+  "version": "0.1.0",
+  "identifier": "com.protocol.keysystem",
+  "build": {
+    "frontendDist": "../../web"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Protocol Key System",
+        "width": 1600,
+        "height": 1150,
+        "minWidth": 1100,
+        "minHeight": 800,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost http://127.0.0.1:8080 https:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.png"]
+  }
+}

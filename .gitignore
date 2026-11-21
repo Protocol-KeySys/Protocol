@@ -1,0 +1,11 @@
+# runtime state — never ship key material or local stores
+server/keys.json
+server/target/
+client/src-tauri/target/
+client/src-tauri/gen/
+
+# misc build output
+*.exe
+*.obj
+*.msi
+app.pdb
