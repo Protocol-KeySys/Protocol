@@ -172,6 +172,14 @@ body {
 }
 .tile:hover { filter: brightness(1.06); }
 
+.empty-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+#plusTile { width: 280px; }
+
 .tile-more {
   background: var(--tile-dark);
   border-color: #000;

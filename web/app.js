@@ -84,22 +84,28 @@ function renderEntitledView() {
   $("backBtn").classList.add("hidden");
 
   const grid = $("platformGrid");
+  const panel = document.querySelector(".platform-panel");
+  const empty = $("emptyArea");
   grid.innerHTML = "";
 
   const platforms = session.platforms || [];
+
+  // No platforms: hide the dark panel entirely, show a centered +
+  // tile in the parent card (future platform-search entry point).
+  if (platforms.length === 0) {
+    panel.classList.add("hidden");
+    empty.classList.remove("hidden");
+    return;
+  }
+
+  panel.classList.remove("hidden");
+  empty.classList.add("hidden");
+
   for (const name of platforms) {
     grid.appendChild(makeTile(name));
   }
 
-  if (platforms.length === 0) {
-    const plus = document.createElement("button");
-    plus.className = "tile tile-more";
-    plus.textContent = "+";
-    plus.title = "Add a platform";
-    plus.addEventListener("click", () =>
-      toast("Platform search coming soon."));
-    grid.appendChild(plus);
-  } else if (platforms.length < 4) {
+  if (platforms.length < 4) {
     const more = document.createElement("button");
     more.className = "tile tile-more";
     more.textContent = "•••";
@@ -131,6 +137,9 @@ async function renderAllAppsView() {
 }
 
 $("backBtn").addEventListener("click", renderEntitledView);
+
+$("plusTile").addEventListener("click", () =>
+  toast("Platform search coming soon."));
 
 function makeTile(name) {
   const tile = document.createElement("button");
