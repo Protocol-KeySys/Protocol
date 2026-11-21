@@ -248,7 +248,7 @@ async fn main() {
         .route("/api/admin/issue", post(issue))
         .route("/api/status", get(status))
         .route("/api/platforms", get(platforms))
-        .nest_service("/", ServeDir::new("../web"))
+        .fallback_service(ServeDir::new("../web"))
         // The packaged client (tauri.localhost) is cross-origin. In prod,
         // restrict this to the client's actual origin instead of Any.
         .layer(CorsLayer::permissive())
